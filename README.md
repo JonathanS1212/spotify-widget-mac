@@ -13,6 +13,7 @@ A native macOS widget and menu bar mini player for the Spotify desktop app. It s
   - Current song name in the menu bar (can be turned off)
   - Click it for a panel with album art, progress and controls
   - Open-at-login toggle
+- **Album art wallpaper** (optional, off by default): like the iPhone lock screen, the current album cover appears on the desktop over a blurred version of itself, on every display and Space, and cross-fades when the track changes. It is drawn behind your icons and widgets, so your real wallpaper is never changed and comes back as soon as Spotify stops or you turn the option off. Turn it on from the menu bar panel.
 - **Floating player** (optional, standalone): a draggable mini player window that works without Xcode
 
 ## Requirements
