@@ -91,6 +91,7 @@ struct MenuBarPlayer: View {
 
             Divider()
             Toggle("Show song in menu bar", isOn: $showTitle)
+            Toggle("Album art as wallpaper", isOn: Binding(get: { monitor.albumWallpaper }, set: { monitor.setAlbumWallpaper($0) }))
             Toggle("Open at login", isOn: Binding(get: { monitor.openAtLogin }, set: { monitor.setOpenAtLogin($0) }))
             HStack {
                 Button("Open Spotify") { monitor.handle("open") }
@@ -118,6 +119,7 @@ final class SpotifyMonitor: ObservableObject {
     @Published private(set) var state = PlayerState()
     @Published private(set) var artwork: NSImage?
     @Published private(set) var openAtLogin = SMAppService.mainApp.status == .enabled
+    @Published private(set) var albumWallpaper = UserDefaults.standard.bool(forKey: "albumWallpaper")
     private var timer: Timer?
     private let sep = "|~|"
 
@@ -128,6 +130,9 @@ final class SpotifyMonitor: ObservableObject {
             UserDefaults.standard.set(true, forKey: "didSetupLogin")
             setOpenAtLogin(true)
         }
+        // Spotify announces every track and play/pause change, so we don't have to wait for the next poll.
+        DistributedNotificationCenter.default().addObserver(forName: .init("com.spotify.client.PlaybackStateChanged"),
+                                                            object: nil, queue: .main) { [weak self] _ in self?.poll() }
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), nil, { _, _, _, _, _ in
             DispatchQueue.main.async { SpotifyMonitor.shared.checkCommandFile() }
         }, Shared.commandNotification as CFString, nil, .deliverImmediately)
@@ -145,6 +150,12 @@ final class SpotifyMonitor: ObservableObject {
             NSLog("Open at Login failed: \(error)")
         }
         openAtLogin = SMAppService.mainApp.status == .enabled
+    }
+
+    func setAlbumWallpaper(_ on: Bool) {
+        albumWallpaper = on
+        UserDefaults.standard.set(on, forKey: "albumWallpaper")
+        if on { poll(force: true) } else { AlbumWallpaper.shared.hide() }
     }
 
     // MARK: Commands
@@ -223,6 +234,7 @@ final class SpotifyMonitor: ObservableObject {
             WidgetCenter.shared.reloadAllTimelines()
         }
         if let artURL, !artURL.isEmpty, artURL != state.artworkSource { downloadArtwork(artURL) }
+        if albumWallpaper { AlbumWallpaper.shared.show(new.title.isEmpty ? nil : artURL) }
     }
 
     private var downloading: String?

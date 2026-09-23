@@ -12,6 +12,7 @@
 		74B75C0201AC958BD99AE416 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = F571EE210B4601AC66934803 /* Shared.swift */; };
 		820ABCC7EC5F9CDA21D74C93 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = F571EE210B4601AC66934803 /* Shared.swift */; };
 		B57DCD1AE6DB085CB003F9F1 /* SpotifyWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7C97AAA465BBC26C3702F7A9 /* SpotifyWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A1B2C3D4E5F6071829304A5C /* Wallpaper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6071829304A5B /* Wallpaper.swift */; };
 		C68AC930BB9100B836103F99 /* SpotifyWidgetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533CA4163A8E3BFD487CF5F4 /* SpotifyWidgetApp.swift */; };
 		CEFBD0A0F3094A5E112A45D1 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A211BCF2F4B900C3857DCD4 /* WidgetKit.framework */; };
 /* End PBXBuildFile section */
@@ -42,6 +43,7 @@
 
 /* Begin PBXFileReference section */
 		48707E7350354A824D0E23CD /* Widget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Widget.entitlements; sourceTree = "<group>"; };
+		A1B2C3D4E5F6071829304A5B /* Wallpaper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wallpaper.swift; sourceTree = "<group>"; };
 		533CA4163A8E3BFD487CF5F4 /* SpotifyWidgetApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyWidgetApp.swift; sourceTree = "<group>"; };
 		5775F89974120667F2F2C5A2 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		5D82C60E3342EBBA01F11E16 /* SpotifyWidget.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpotifyWidget.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -81,6 +83,7 @@
 				5775F89974120667F2F2C5A2 /* App.entitlements */,
 				A0059DB9AB215E39C7FCAFA7 /* Info.plist */,
 				533CA4163A8E3BFD487CF5F4 /* SpotifyWidgetApp.swift */,
+				A1B2C3D4E5F6071829304A5B /* Wallpaper.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -210,6 +213,7 @@
 			files = (
 				74B75C0201AC958BD99AE416 /* Shared.swift in Sources */,
 				C68AC930BB9100B836103F99 /* SpotifyWidgetApp.swift in Sources */,
+				A1B2C3D4E5F6071829304A5C /* Wallpaper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
