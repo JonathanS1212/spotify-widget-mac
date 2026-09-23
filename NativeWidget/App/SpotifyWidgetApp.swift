@@ -132,7 +132,11 @@ final class SpotifyMonitor: ObservableObject {
         }
         // Spotify announces every track and play/pause change, so we don't have to wait for the next poll.
         DistributedNotificationCenter.default().addObserver(forName: .init("com.spotify.client.PlaybackStateChanged"),
-                                                            object: nil, queue: .main) { [weak self] _ in self?.poll() }
+                                                            object: nil, queue: .main) { [weak self] _ in
+            self?.poll()
+            // Spotify can post this a moment before AppleScript reports the new track.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { self?.poll() }
+        }
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), nil, { _, _, _, _, _ in
             DispatchQueue.main.async { SpotifyMonitor.shared.checkCommandFile() }
         }, Shared.commandNotification as CFString, nil, .deliverImmediately)
@@ -228,16 +232,27 @@ final class SpotifyMonitor: ObservableObject {
         let drift = abs(state.position(at: Date()) - new.position)
         let changed = new.running != state.running || new.isPlaying != state.isPlaying
             || new.title != state.title || new.artist != state.artist || drift > 3
+        let newArt = artURL.flatMap { $0.isEmpty || $0 == state.artworkSource ? nil : $0 }
         if force || changed {
             state = new
             state.save()
-            WidgetCenter.shared.reloadAllTimelines()
+            // On a new track, reload once the cover is in so the widget doesn't show the new title with the
+            // old art (WidgetKit throttles reloads, so a second one can lag). Fall back if the download stalls.
+            if newArt == nil { WidgetCenter.shared.reloadAllTimelines() } else { scheduleFallbackReload() }
         }
-        if let artURL, !artURL.isEmpty, artURL != state.artworkSource { downloadArtwork(artURL) }
+        if let newArt { downloadArtwork(newArt) }
         if albumWallpaper { AlbumWallpaper.shared.show(new.title.isEmpty ? nil : artURL) }
     }
 
     private var downloading: String?
+    private var fallbackReload: DispatchWorkItem?
+
+    private func scheduleFallbackReload() {
+        fallbackReload?.cancel()
+        let work = DispatchWorkItem { WidgetCenter.shared.reloadAllTimelines() }
+        fallbackReload = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: work)
+    }
 
     private func downloadArtwork(_ urlString: String) {
         guard downloading != urlString, let url = URL(string: urlString) else { return }
@@ -246,7 +261,10 @@ final class SpotifyMonitor: ObservableObject {
             let jpeg = data.flatMap(NSImage.init(data:)).flatMap { Self.jpeg($0, side: 300) }
             DispatchQueue.main.async {
                 self.downloading = nil
-                guard let jpeg, (try? jpeg.write(to: Shared.artworkURL, options: .atomic)) != nil else { return }
+                self.fallbackReload?.cancel()
+                guard let jpeg, (try? jpeg.write(to: Shared.artworkURL, options: .atomic)) != nil else {
+                    return WidgetCenter.shared.reloadAllTimelines()
+                }
                 self.state.artworkSource = urlString
                 self.state.save()
                 self.artwork = NSImage(data: jpeg)
