@@ -24,7 +24,13 @@ A native macOS widget and menu bar mini player for the Spotify desktop app. It s
 
 ## Install
 
-### Widget + menu bar player
+### Download
+
+Get **Spotify Widget.dmg** from the [latest release](https://github.com/JonathanS1212/spotify-widget-mac/releases/latest), open it, and drag **Spotify Widget** into **Applications**. It runs on Apple silicon and Intel Macs.
+
+The app isn't notarized, so the first time you open it macOS will block it. Right-click the app and choose **Open**, or go to **System Settings → Privacy & Security → Open Anyway**. Then follow the two setup steps under "Build from source" below.
+
+### Build from source (widget + menu bar player)
 
 ```sh
 git clone https://github.com/JonathanS1212/spotify-widget-mac.git
@@ -32,7 +38,7 @@ cd spotify-widget-mac/NativeWidget
 ./build.sh
 ```
 
-This builds the app, installs it to `/Applications/Spotify Widget.app`, and launches it. Then:
+This builds the app, installs it to `/Applications/Spotify Widget.app`, and launches it. To package a universal DMG instead, run `./make-dmg.sh`; it writes `build/Spotify Widget.dmg`. Then:
 
 1. When macOS asks whether **Spotify Widget** may control **Spotify**, click **OK**.
 2. Right-click the desktop → **Edit Widgets…** → search **Spotify** → drag a widget onto the desktop or into Notification Center.
