@@ -28,7 +28,13 @@ A native macOS widget and menu bar mini player for the Spotify desktop app. It s
 
 Get **Spotify Widget.dmg** from the [latest release](https://github.com/JonathanS1212/spotify-widget-mac/releases/latest), open it, and drag **Spotify Widget** into **Applications**. It runs on Apple silicon and Intel Macs.
 
-The app isn't notarized, so the first time you open it macOS will block it. Right-click the app and choose **Open**, or go to **System Settings → Privacy & Security → Open Anyway**. Then follow the two setup steps under "Build from source" below.
+The app isn't notarized, so macOS blocks it the first time. Open it once, then go to **System Settings → Privacy & Security** and click **Open Anyway**. Or run this in Terminal after copying it to Applications:
+
+```sh
+xattr -cr "/Applications/Spotify Widget.app"
+```
+
+Always run it from **Applications**, not from inside the DMG. Then follow the two setup steps under "Build from source" below.
 
 ### Build from source (widget + menu bar player)
 
@@ -63,7 +69,7 @@ Widgets run in a sandbox and can't talk to Spotify directly, so the project has 
 
 | Part | What it does |
 | --- | --- |
-| `App/` – menu bar helper | Polls Spotify through AppleScript, saves the track info and resized artwork to a shared App Group folder, and tells WidgetKit to refresh when the track, play state or position changes. It also runs the menu bar player. |
+| `App/` – menu bar helper | Polls Spotify through AppleScript, saves the track info and resized artwork to a shared folder in `~/Library/Application Support/Spotify Widget`, and tells WidgetKit to refresh when the track, play state or position changes. It also runs the menu bar player. |
 | `Widget/` – WidgetKit extension | Reads the shared state and draws the widget. The buttons are App Intents. They leave a command in the shared folder and post a Darwin notification, and the helper forwards the command to Spotify. |
 | `Shared/` | The state model and shared file paths used by both parts. |
 
@@ -89,8 +95,9 @@ To regenerate the Xcode project after editing `project.yml`, install [XcodeGen](
 ## Troubleshooting
 
 - **The widget says "Spotify is closed" or never updates.** Check that the menu bar helper is running (look for the music-note icon). Also check System Settings → Privacy & Security → Automation → Spotify Widget → Spotify is on.
+- **The menu bar icon is missing.** macOS hides menu bar icons that don't fit, which happens a lot on MacBooks with a notch. Open **Spotify Widget** from Applications again to get the same controls and settings in a window, and turn off "Show song in menu bar" to make the icon smaller.
 - **The widget isn't in the gallery.** Make sure the app is in `/Applications` and has been launched at least once.
-- **The widget can't read the helper's data.** `build.sh` signs the app locally, which is enough on most Macs. If it isn't enough on yours, open the project in Xcode, choose your team under *Signing & Capabilities* for both targets, and build from there.
+- **The widget can't read the helper's data.** The helper saves the track info to `~/Library/Application Support/Spotify Widget/`. Check that `state.json` there updates when the song changes. If you just updated from an older version, remove the widget and add it again.
 
 ## Disclaimer
 

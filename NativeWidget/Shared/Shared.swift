@@ -1,12 +1,18 @@
 import Foundation
 
-/// Paths and state shared between the helper app and the widget via the App Group container.
+/// Paths and state shared between the helper app and the widget.
+///
+/// This is a plain folder in ~/Library/Application Support rather than an App Group container: the app is
+/// ad-hoc signed, and macOS 15 won't let the sandboxed widget into an App Group that isn't tied to a signing team.
+/// The widget reaches the folder through a sandbox exception in Widget.entitlements.
 enum Shared {
-    static let groupID = Bundle.main.object(forInfoDictionaryKey: "AppGroupID") as? String ?? "com.sztjonathan.spotifywidget"
-    static var container: URL {
-        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupID)
-            ?? FileManager.default.temporaryDirectory
-    }
+    static let container: URL = {
+        // Inside the sandbox NSHomeDirectory() points at the widget's container, so look up the real home.
+        let home = getpwuid(getuid()).flatMap { String(validatingUTF8: $0.pointee.pw_dir) } ?? NSHomeDirectory()
+        let url = URL(fileURLWithPath: home).appendingPathComponent("Library/Application Support/Spotify Widget")
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }()
     static var stateURL: URL { container.appendingPathComponent("state.json") }
     static var artworkURL: URL { container.appendingPathComponent("artwork.jpg") }
     static var commandURL: URL { container.appendingPathComponent("command.txt") }
