@@ -4,6 +4,7 @@ import ServiceManagement
 
 @main
 struct SpotifyWidgetApp: App {
+    @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate
     @StateObject private var monitor = SpotifyMonitor.shared
     @AppStorage("showTitleInMenuBar") private var showTitle = true
 
@@ -22,6 +23,37 @@ struct SpotifyWidgetApp: App {
 
     static func truncate(_ text: String, _ max: Int) -> String {
         text.count > max ? String(text.prefix(max - 1)) + "…" : text
+    }
+}
+
+/// The menu bar icon can end up hidden (behind the notch, or when the menu bar is full), so opening the app
+/// again from Finder or Launchpad shows the same player in a regular window. It also shows once on first launch.
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    private var window: NSWindow?
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        if !UserDefaults.standard.bool(forKey: "didShowWelcome") {
+            UserDefaults.standard.set(true, forKey: "didShowWelcome")
+            showWindow()
+        }
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        showWindow()
+        return false
+    }
+
+    func showWindow() {
+        if window == nil {
+            let w = NSWindow(contentViewController: NSHostingController(rootView: MenuBarPlayer(monitor: .shared)))
+            w.title = "Spotify Widget"
+            w.styleMask = [.titled, .closable]
+            w.isReleasedWhenClosed = false
+            w.center()
+            window = w
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        window?.makeKeyAndOrderFront(nil)
     }
 }
 
